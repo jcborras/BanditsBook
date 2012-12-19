@@ -37,7 +37,7 @@ def run_simulation(alg,arms,hor,sim_number):
 
 def run_montecarlo(alg, arms, n_sims, hor):
   alg.initialize(len(arms))
-  return [run_simulation(alg, arms, hor,i) for i in range(n_sims)][0]
+  return [run_simulation(alg, arms, hor,i) for i in range(n_sims)]
 
 def test_algorithm(algo, arms, num_sims, horizon):
   chosen_arms = [0.0 for i in range(num_sims * horizon)]
@@ -84,18 +84,20 @@ class EpsilonGreedyTest(TestCase):
     return
  
   def test_montecarlo(self):
-    N_SIMS, HORIZON, EPSILON = 1, 7, random()
+    N_SIMS, HORIZON, EPSILON = 2, 7, random()
     seed(1)
     algo = EpsilonGreedy(EPSILON, [], [])
     algo.initialize(self.n_arms)
     results = run_montecarlo(algo, self.arms, N_SIMS, HORIZON)
+    print '+>',results
     seed(1)
     algo2 = EpsilonGreedy(EPSILON, [], [])
     algo2.initialize(self.n_arms)
-    results2 = test_algorithm(algo2, self.arms, N_SIMS, HORIZON)
-    self.assertEqual(results[2], results2[2])
-    self.assertEqual(results[3], results2[3])
-    self.assertEqual(results[4], results2[4])
+    results_orig = test_algorithm(algo2, self.arms, N_SIMS, HORIZON)
+    print '->',results_orig
+    self.assertEqual(results[2], results_orig[2])
+    self.assertEqual(results[3], results_orig[3])
+    self.assertEqual(results[4], results_orig[4])
 
   def test_standard(self):
     N_SIMS, HORIZON = 1000, 250
