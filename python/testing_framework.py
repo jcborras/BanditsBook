@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-from csv import DictWriter
 from random import random, seed, shuffle
 from unittest import TestCase, main
 
@@ -26,19 +25,26 @@ def run_trial(alg, arms):
   alg.update(chosen, reward)
   return [chosen,reward]
 
-def run_simulation(alg,arms,hor,sim_number):
-  times = range(hor)
+def run_simulation(alg,arms,hor):
+  times = range(1,hor+1)
   x = [ run_trial(alg, arms) for i in times ]
   chosen_arm = [ z[0] for z in x ]
   rewards = [ z[1] for z in x ]
   cumulative_rewards = list(cumsum(rewards))
   assert len(times)==len(chosen_arm)==len(rewards)==len(cumulative_rewards)
-  return [hor*[sim_number], times, chosen_arm, rewards, cumulative_rewards]
+  return [times, chosen_arm, rewards, cumulative_rewards]
 
 def run_montecarlo(alg, arms, n_sims, hor):
-  alg.initialize(len(arms))
-  return [run_simulation(alg, arms, hor,i) for i in range(n_sims)]
-
+    L = n_sims*hor
+    sim_num, times, chosen_arms, rewards, cumulative_rewards = L*[0.0], L*[0.0], L*[0.0], L*[0.0], L*[0.0]
+    for i in range(n_sims):
+        alg.initialize(len(arms))
+        p = i*hor
+        q = p+hor
+        sim_num[p:q] = hor*[i+1]
+        times[p:q],chosen_arms[p:q],rewards[p:q],cumulative_rewards[p:q] = run_simulation(alg, arms, hor)
+    return [sim_num, times, chosen_arms, rewards, cumulative_rewards]
+    
 def test_algorithm(algo, arms, num_sims, horizon):
   chosen_arms = [0.0 for i in range(num_sims * horizon)]
   rewards = [0.0 for i in range(num_sims * horizon)]
@@ -72,68 +78,74 @@ def test_algorithm(algo, arms, num_sims, horizon):
   return [sim_nums, times, chosen_arms, rewards, cumulative_rewards]
 
 class EpsilonGreedyTest(TestCase):
-  def setUp(self):
-    seed(1)
-    self.means = [0.1, 0.1, 0.1, 0.1, 0.9]
-    self.n_arms = len(self.means)
-    shuffle(self.means)
-    self.arms = map(lambda (mu): BernoulliArm(mu), self.means)
-    print("Best arm is " + str(ind_max(self.means)))
-
-  def tearDown(self):
-    return
- 
-  def test_montecarlo(self):
-    N_SIMS, HORIZON, EPSILON = 2, 7, random()
-    seed(1)
-    algo = EpsilonGreedy(EPSILON, [], [])
-    algo.initialize(self.n_arms)
-    results = run_montecarlo(algo, self.arms, N_SIMS, HORIZON)
-    print '+>',results
-    seed(1)
-    algo2 = EpsilonGreedy(EPSILON, [], [])
-    algo2.initialize(self.n_arms)
-    results_orig = test_algorithm(algo2, self.arms, N_SIMS, HORIZON)
-    print '->',results_orig
-    self.assertEqual(results[2], results_orig[2])
-    self.assertEqual(results[3], results_orig[3])
-    self.assertEqual(results[4], results_orig[4])
-
-  def test_standard(self):
     N_SIMS, HORIZON = 1000, 250
-    f = open(RESULTS_DIR+"epsilon_greedy_standard_results.csv", "w")
+    f = run_montecarlo
+    #f = test_algorithm
+    def setUp(self):
+        seed(1)
+        self.means = [0.1, 0.1, 0.1, 0.1, 0.9]
+        self.n_arms = len(self.means)
+        shuffle(self.means)
+        self.arms = map(lambda (mu): BernoulliArm(mu), self.means)
+        print("Best arm is " + str(ind_max(self.means)))
 
-    for epsilon in [0.1, 0.2, 0.3, 0.4, 0.5]:
-      algo = EpsilonGreedy(epsilon, [], [])
-      algo.initialize(self.n_arms)
-      results = test_algorithm(algo, self.arms, N_SIMS, HORIZON)
-      for i in range(len(results[0])):
-        f.write(str(epsilon) + ",")
-        f.write(",".join([str(results[j][i]) for j in range(len(results))]) + "\n")
-    f.close()
+    def tearDown(self):
+        return
+ 
+    def test_montecarlo(self):
+        N_SIMS, HORIZON, EPSILON = 20, 500, random()
+        seed(1)
+        algo = EpsilonGreedy(EPSILON, [], [])
+        algo.initialize(self.n_arms)
+        results = run_montecarlo(algo, self.arms, N_SIMS, HORIZON)
+        seed(1)
+        algo2 = EpsilonGreedy(EPSILON, [], [])
+        algo2.initialize(self.n_arms)
+        results_orig = test_algorithm(algo2, self.arms, N_SIMS, HORIZON)
+        self.assertEqual(results[0], results_orig[0])
+        self.assertEqual(results[1], results_orig[1])
+        self.assertEqual(results[2], results_orig[2])
+        self.assertEqual(results[3], results_orig[3])
+        self.assertEqual(results[4], results_orig[4])
 
-  def results_to_file(r, f):
-    fieldnames = ['num_sim', 'times', 'chosen_arm', 'rewards','cumulative_rewards']
+    def test_standard(self):
+        f = open(RESULTS_DIR+"epsilon_greedy_standard_results.csv", "w")
+
+        for epsilon in [0.1, 0.2, 0.3, 0.4, 0.5]:
+            algo = EpsilonGreedy(epsilon, [], [])
+            algo.initialize(self.n_arms)
+            results = test_algorithm(algo, self.arms, self.N_SIMS, self.HORIZON)
+            for i in range(len(results[0])):
+                f.write(str(epsilon) + ",")
+                f.write(",".join([str(results[j][i]) for j in range(len(results))]) + "\n")
+        f.close()
+
+    def results_to_file(r, f):
+        fieldnames = ['num_sim', 'times', 'chosen_arm', 'rewards','cumulative_rewards']
     
-  def test_standard2(self):
-    N_SIMS, HORIZON = 10, 25
-    f = open(RESULTS_DIR+"epsilon_greedy_standard_results2.csv",'w')
-    for epsilon in [0.1, 0.2, 0.3, 0.4, 0.5]:
-      algo = EpsilonGreedy(epsilon, [], [])
-      algo.initialize(self.n_arms)
-      results = run_montecarlo(algo, self.arms, N_SIMS, HORIZON)
-    f.close()
+    def test_standard2(self):
+        f = open(RESULTS_DIR+"epsilon_greedy_standard_results2.csv", "w")
 
-  def test_annealing(self):
-    my_algo = AnnealingEpsilonGreedy([], [])
-    my_algo.initialize(self.n_arms)
-    results = test_algorithm(my_algo, self.arms, 5000, 250)
+        for epsilon in [0.1, 0.2, 0.3, 0.4, 0.5]:
+            algo = EpsilonGreedy(epsilon, [], [])
+            algo.initialize(self.n_arms)
+            results = run_montecarlo(algo, self.arms, self.N_SIMS, self.HORIZON)
+            for i in range(len(results[0])):
+                f.write(str(epsilon) + ",")
+                f.write(",".join([str(results[j][i]) for j in range(len(results))]) + "\n")
 
-    f = open(RESULTS_DIR+"epsilon_greedy_annealing_results.tsv", "w")
+        f.close()
 
-    for i in range(len(results[0])):
-      f.write("\t".join([str(results[j][i]) for j in range(len(results))]) + "\n")
-    f.close()
+    def test_annealing(self):
+        my_algo = AnnealingEpsilonGreedy([], [])
+        my_algo.initialize(self.n_arms)
+        results = test_algorithm(my_algo, self.arms, self.N_SIMS, self.HORIZON)
+
+        f = open(RESULTS_DIR+"epsilon_greedy_annealing_results.tsv", "w")
+
+        for i in range(len(results[0])):
+            f.write("\t".join([str(results[j][i]) for j in range(len(results))]) + "\n")
+        f.close()
 
 
 class SoftmaxTest(EpsilonGreedyTest):
