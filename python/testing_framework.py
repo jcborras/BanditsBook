@@ -81,6 +81,7 @@ class EpsilonGreedyTest(TestCase):
     N_SIMS, HORIZON = 1000, 250
     f = run_montecarlo
     #f = test_algorithm
+
     def setUp(self):
         seed(1)
         self.means = [0.1, 0.1, 0.1, 0.1, 0.9]
