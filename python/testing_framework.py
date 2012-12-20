@@ -78,7 +78,7 @@ def test_algorithm(algo, arms, num_sims, horizon):
   return [sim_nums, times, chosen_arms, rewards, cumulative_rewards]
 
 class EpsilonGreedyTest(TestCase):
-    N_SIMS, HORIZON = 1000, 250
+    N_SIMS, HORIZON = 5000, 250
     f = run_montecarlo
     #f = test_algorithm
 
