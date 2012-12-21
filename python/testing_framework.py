@@ -124,18 +124,6 @@ class EpsilonGreedyTest(BaseTestCase):
         [self.assertEqual(results[i], results_orig[i]) for i in range(1,5)]
 
     def test_standard(self):
-        f = open(RESULTS_DIR+"epsilon_greedy_standard_results.csv", "w")
-
-        for epsilon in [0.1, 0.2, 0.3, 0.4, 0.5]:
-            algo = EpsilonGreedy(epsilon, [], [])
-            algo.initialize(self.n_arms)
-            results = test_algorithm(algo, self.arms, self.N_SIMS, self.HORIZON)
-            for i in range(len(results[0])):
-                f.write(str(epsilon) + ",")
-                f.write(",".join([str(results[j][i]) for j in range(len(results))]) + "\n")
-        f.close()
-    
-    def test_standard2(self):
         f = open(RESULTS_DIR+"epsilon_greedy_standard_results2.csv", "w")
         results_to_file(f, None, ['epsilon','best_arm', 'num_sim', 'times', 'chosen_arm', 'rewards','cumulative_rewards'])
 
@@ -159,17 +147,6 @@ class EpsilonGreedyTest(BaseTestCase):
 
 class SoftmaxTest(BaseTestCase):
     def test_standard(self):
-        f = open(RESULTS_DIR+"softmax_standard_results.tsv", "w")
-        for temperature in [0.1, 0.2, 0.3, 0.4, 0.5]:
-            algo = Softmax(temperature, [], [])
-            algo.initialize(self.n_arms)
-            results = test_algorithm(algo, self.arms, 5000, 250)
-            for i in range(len(results[0])):
-                f.write(str(temperature) + "\t")
-                f.write("\t".join([str(results[j][i]) for j in range(len(results))]) + "\n")
-        f.close()
-
-    def test_standard2(self):
         f = open(RESULTS_DIR+"softmax_standard_results2.csv", "w")
         headers = ['temperature', 'best_arm', 'num_sim', 'times', 'chosen_arm', 'rewards','cumulative_rewards']
         results_to_file(f, None, headers)
@@ -183,16 +160,6 @@ class SoftmaxTest(BaseTestCase):
     def test_annealing(self):
         algo = AnnealingSoftmax([], [])
         algo.initialize(self.n_arms)
-        results = test_algorithm(algo, self.arms, 5000, 250)
-
-        f = open(RESULTS_DIR+"softmax_annealing_results.tsv", "w")
-        for i in range(len(results[0])):
-            f.write("\t".join([str(results[j][i]) for j in range(len(results))]) + "\n")
-        f.close()
-
-    def test_annealing2(self):
-        algo = AnnealingSoftmax([], [])
-        algo.initialize(self.n_arms)
         results = test_run(algo, self.arms, self.N_SIMS, self.HORIZON)
 
         f = open(RESULTS_DIR+"softmax_annealing_results2.csv", "w")
@@ -202,74 +169,38 @@ class SoftmaxTest(BaseTestCase):
 
 
 class UCBTest(BaseTestCase):
-  def test_UCB1(self):
-    algo = UCB1([], [])
-    algo.initialize(self.n_arms)
-    results = test_algorithm(algo, self.arms, 5000, 250)
+    def test_UCB1(self):
+        algo = UCB1([], [])
+        algo.initialize(self.n_arms)
+        results = test_run(algo, self.arms, self.N_SIMS, self.HORIZON)
 
-    f = open(RESULTS_DIR+"ucb1_results.tsv", "w")
+        f = open(RESULTS_DIR+"ucb1_results2.csv", "w")
+        head = ['best_arm', 'num_sim', 'times', 'chosen_arm', 'rewards','cumulative_rewards']
+        results_to_file(f, [len(results[0])*[ind_max(self.means)]]+results, head)
+        f.close()
 
-    for i in range(len(results[0])):
-      f.write("\t".join([str(results[j][i]) for j in range(len(results))]) + "\n")
-    f.close()
-
-  def test_UCB1_b(self):
-    algo = UCB1([], [])
-    algo.initialize(self.n_arms)
-    results = test_run(algo, self.arms, self.N_SIMS, self.HORIZON)
-
-    f = open(RESULTS_DIR+"ucb1_results2.csv", "w")
-    head = ['best_arm', 'num_sim', 'times', 'chosen_arm', 'rewards','cumulative_rewards']
-    results_to_file(f, [len(results[0])*[ind_max(self.means)]]+results, head)
-    f.close()
-
-  def test_UCB2(self):
-    for alpha in [0.1, 0.3, 0.5, 0.7, 0.9]:
-      algo = UCB2(alpha, [], [])
-      algo.initialize(self.n_arms)
-      results = test_algorithm(algo, self.arms, 5000, 250)
-
-      f = open(RESULTS_DIR+"ucb2_results_%s.tsv" % alpha, "w")
-
-      for i in range(len(results[0])):
-        f.write("\t".join([str(results[j][i]) for j in range(len(results))]))
-        f.write("\t%s\n" % alpha)
-
-      f.close()
-
-  def test_UCB2_b(self):
-      f = open(RESULTS_DIR+"ucb2_results2.csv", "w")
-      headers = ['alpha', 'best_arm', 'num_sim', 'times', 'chosen_arm', 'rewards','cumulative_rewards']
-      results_to_file(f, None, headers)
-      for alpha in [0.1, 0.3, 0.5, 0.7, 0.9]:
-          algo = UCB2(alpha, [], [])
-          algo.initialize(self.n_arms)
-          results = test_run(algo, self.arms, self.N_SIMS, self.HORIZON)
-          results_to_file(f, [len(results[0])*[alpha]] + [len(results[0])*[ind_max(self.means)]] + results)
-      f.close()
+    def test_UCB2(self):
+        f = open(RESULTS_DIR+"ucb2_results2.csv", "w")
+        headers = ['alpha', 'best_arm', 'num_sim', 'times', 'chosen_arm', 'rewards','cumulative_rewards']
+        results_to_file(f, None, headers)
+        for alpha in [0.1, 0.3, 0.5, 0.7, 0.9]:
+            algo = UCB2(alpha, [], [])
+            algo.initialize(self.n_arms)
+            results = test_run(algo, self.arms, self.N_SIMS, self.HORIZON)
+            results_to_file(f, [len(results[0])*[alpha]] + [len(results[0])*[ind_max(self.means)]] + results)
+        f.close()
 
 
 class Exp3Test(BaseTestCase):
-  def test_Exp3(self):
-    f = open(RESULTS_DIR+"exp3_results.tsv", "w")
-    for exp3_gamma in [0.1, 0.2, 0.3, 0.4, 0.5]:
-      algo = Exp3(exp3_gamma, [])
-      algo.initialize(self.n_arms)
-      results = test_algorithm(algo, self.arms, 5000, 250)
-      for i in range(len(results[0])):
-        f.write(str(exp3_gamma) + "\t")
-        f.write("\t".join([str(results[j][i]) for j in range(len(results))]) + "\n")
-    f.close()
-
-  def test_Exp3_b(self):
-    f = open(RESULTS_DIR+"exp3_results2.csv", "w")
-    headers = ['exp3_gamma', 'best_arm', 'num_sim', 'times', 'chosen_arm', 'rewards','cumulative_rewards']
-    for exp3_gamma in [0.1, 0.2, 0.3, 0.4, 0.5]:
-      algo = Exp3(exp3_gamma, [])
-      algo.initialize(self.n_arms)
-      results = test_algorithm(algo, self.arms, self.N_SIMS, self.HORIZON)
-      results_to_file(f, [len(results[0])*[exp3_gamma]] + [len(results[0])*[ind_max(self.means)]] + results)
-    f.close()
+    def test_Exp3_b(self):
+        f = open(RESULTS_DIR+"exp3_results2.csv", "w")
+        headers = ['exp3_gamma', 'best_arm', 'num_sim', 'times', 'chosen_arm', 'rewards','cumulative_rewards']
+        for exp3_gamma in [0.1, 0.2, 0.3, 0.4, 0.5]:
+            algo = Exp3(exp3_gamma, [])
+            algo.initialize(self.n_arms)
+            results = test_algorithm(algo, self.arms, self.N_SIMS, self.HORIZON)
+            results_to_file(f, [len(results[0])*[exp3_gamma]] + [len(results[0])*[ind_max(self.means)]] + results)
+        f.close()
 
 
 class HedgeTest(BaseTestCase):
