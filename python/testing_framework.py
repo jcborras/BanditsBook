@@ -77,10 +77,24 @@ def test_algorithm(algo, arms, num_sims, horizon):
   
   return [sim_nums, times, chosen_arms, rewards, cumulative_rewards]
 
+test_run = run_montecarlo
+#test_run = test_algorithm
+
+def csf(l):
+    """Comma separated fields"""
+    return reduce(lambda a,b: str(a)+','+str(b), l)
+
+def results_to_file(f, r, fieldnames=None):
+    if fieldnames is not None:
+        [f.write(s) for s in [csf(fieldnames), '\n']]
+    if r is not None:
+        w = len(r)
+        print w
+        for l in range(len(r[0])):
+            f.write(csf([r[j][l] for j in range(w)]) + '\n')
+
 class EpsilonGreedyTest(TestCase):
     N_SIMS, HORIZON = 5000, 250
-    f = run_montecarlo
-    #f = test_algorithm
 
     def setUp(self):
         seed(1)
@@ -88,10 +102,11 @@ class EpsilonGreedyTest(TestCase):
         self.n_arms = len(self.means)
         shuffle(self.means)
         self.arms = map(lambda (mu): BernoulliArm(mu), self.means)
+        print("Means shuffled " + str(self.means))
         print("Best arm is " + str(ind_max(self.means)))
 
     def tearDown(self):
-        return
+        pass
 
     def montecarlo_alg(self, epsilon):
         seed(1)
@@ -116,27 +131,23 @@ class EpsilonGreedyTest(TestCase):
                 f.write(str(epsilon) + ",")
                 f.write(",".join([str(results[j][i]) for j in range(len(results))]) + "\n")
         f.close()
-
-    def results_to_file(r, f):
-        fieldnames = ['num_sim', 'times', 'chosen_arm', 'rewards','cumulative_rewards']
     
     def test_standard2(self):
         f = open(RESULTS_DIR+"epsilon_greedy_standard_results2.csv", "w")
+        results_to_file(f, None, ['epsilon','num_sim', 'times', 'chosen_arm', 'rewards','cumulative_rewards'])
 
         for epsilon in [0.1, 0.2, 0.3, 0.4, 0.5]:
             algo = EpsilonGreedy(epsilon, [], [])
             algo.initialize(self.n_arms)
-            results = run_montecarlo(algo, self.arms, self.N_SIMS, self.HORIZON)
-            for i in range(len(results[0])):
-                f.write(str(epsilon) + ",")
-                f.write(",".join([str(results[j][i]) for j in range(len(results))]) + "\n")
+            results = test_run(algo, self.arms, self.N_SIMS, self.HORIZON)
+            results_to_file(f, [len(results[0])*[epsilon]]+results)
 
         f.close()
 
     def test_annealing(self):
         my_algo = AnnealingEpsilonGreedy([], [])
         my_algo.initialize(self.n_arms)
-        results = test_algorithm(my_algo, self.arms, self.N_SIMS, self.HORIZON)
+        results = test_run(my_algo, self.arms, self.N_SIMS, self.HORIZON)
 
         f = open(RESULTS_DIR+"epsilon_greedy_annealing_results.tsv", "w")
 
