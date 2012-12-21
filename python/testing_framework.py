@@ -149,10 +149,12 @@ class EpsilonGreedyTest(TestCase):
         my_algo.initialize(self.n_arms)
         results = test_run(my_algo, self.arms, self.N_SIMS, self.HORIZON)
 
-        f = open(RESULTS_DIR+"epsilon_greedy_annealing_results.tsv", "w")
+        f = open(RESULTS_DIR+"epsilon_greedy_annealing_results.csv", "w")
+        head = ['best_arm', 'num_sim', 'times', 'chosen_arm', 'rewards','cumulative_rewards']
+        results_to_file(f, [len(results[0])*[ind_max(self.means)]]+results, head)
 
-        for i in range(len(results[0])):
-            f.write("\t".join([str(results[j][i]) for j in range(len(results))]) + "\n")
+        #for i in range(len(results[0])):
+        #    f.write("\t".join([str(results[j][i]) for j in range(len(results))]) + "\n")
         f.close()
 
 
