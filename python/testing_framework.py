@@ -92,22 +92,18 @@ class EpsilonGreedyTest(TestCase):
 
     def tearDown(self):
         return
- 
+
+    def montecarlo_alg(self, epsilon):
+        seed(1)
+        alg = EpsilonGreedy(epsilon, [], [])
+        alg.initialize(self.n_arms)
+        return alg
+    
     def test_montecarlo(self):
         N_SIMS, HORIZON, EPSILON = 20, 500, random()
-        seed(1)
-        algo = EpsilonGreedy(EPSILON, [], [])
-        algo.initialize(self.n_arms)
-        results = run_montecarlo(algo, self.arms, N_SIMS, HORIZON)
-        seed(1)
-        algo2 = EpsilonGreedy(EPSILON, [], [])
-        algo2.initialize(self.n_arms)
-        results_orig = test_algorithm(algo2, self.arms, N_SIMS, HORIZON)
-        self.assertEqual(results[0], results_orig[0])
-        self.assertEqual(results[1], results_orig[1])
-        self.assertEqual(results[2], results_orig[2])
-        self.assertEqual(results[3], results_orig[3])
-        self.assertEqual(results[4], results_orig[4])
+        results = run_montecarlo(self.montecarlo_alg(EPSILON), self.arms, N_SIMS, HORIZON)
+        results_orig = test_algorithm(self.montecarlo_alg(EPSILON), self.arms, N_SIMS, HORIZON)
+        [self.assertEqual(results[i], results_orig[i]) for i in range(1,5)]
 
     def test_standard(self):
         f = open(RESULTS_DIR+"epsilon_greedy_standard_results.csv", "w")
