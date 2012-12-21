@@ -35,6 +35,7 @@ def run_simulation(alg,arms,hor):
   return [times, chosen_arm, rewards, cumulative_rewards]
 
 def run_montecarlo(alg, arms, n_sims, hor):
+    alg.initialize(len(arms))
     L = n_sims*hor
     sim_num, times, chosen_arms, rewards, cumulative_rewards = L*[0.0], L*[0.0], L*[0.0], L*[0.0], L*[0.0]
     for i in range(n_sims):
@@ -128,16 +129,12 @@ class EpsilonGreedyTest(BaseTestCase):
         results_to_file(f, None, ['epsilon','best_arm', 'num_sim', 'times', 'chosen_arm', 'rewards','cumulative_rewards'])
 
         for epsilon in [0.1, 0.2, 0.3, 0.4, 0.5]:
-            algo = EpsilonGreedy(epsilon, [], [])
-            algo.initialize(self.n_arms)
-            results = test_run(algo, self.arms, self.N_SIMS, self.HORIZON)
+            results = test_run(EpsilonGreedy(epsilon, [], []), self.arms, self.N_SIMS, self.HORIZON)
             results_to_file(f, [len(results[0])*[epsilon]] + [len(results[0])*[ind_max(self.means)]] + results)
         f.close()
 
     def test_annealing(self):
-        my_algo = AnnealingEpsilonGreedy([], [])
-        my_algo.initialize(self.n_arms)
-        results = test_run(my_algo, self.arms, self.N_SIMS, self.HORIZON)
+        results = test_run(AnnealingEpsilonGreedy([], []), self.arms, self.N_SIMS, self.HORIZON)
 
         f = open(RESULTS_DIR+"epsilon_greedy_annealing_results.csv", "w")
         head = ['best_arm', 'num_sim', 'times', 'chosen_arm', 'rewards','cumulative_rewards']
@@ -151,16 +148,12 @@ class SoftmaxTest(BaseTestCase):
         headers = ['temperature', 'best_arm', 'num_sim', 'times', 'chosen_arm', 'rewards','cumulative_rewards']
         results_to_file(f, None, headers)
         for temperature in [0.1, 0.2, 0.3, 0.4, 0.5]:
-            algo = Softmax(temperature, [], [])
-            algo.initialize(self.n_arms)
-            results = test_run(algo, self.arms, self.NSIMS, self.HORIZON)
+            results = test_run(Softmax(temperature, [], []), self.arms, self.NSIMS, self.HORIZON)
             results_to_file(f, [len(results[0])*[temperature]] + [len(results[0])*[ind_max(self.means)]] + results)
         f.close()
 
     def test_annealing(self):
-        algo = AnnealingSoftmax([], [])
-        algo.initialize(self.n_arms)
-        results = test_run(algo, self.arms, self.N_SIMS, self.HORIZON)
+        results = test_run(AnnealingSoftmax([], []), self.arms, self.N_SIMS, self.HORIZON)
 
         f = open(RESULTS_DIR+"softmax_annealing_results2.csv", "w")
         head = ['best_arm', 'num_sim', 'times', 'chosen_arm', 'rewards','cumulative_rewards']
@@ -170,9 +163,7 @@ class SoftmaxTest(BaseTestCase):
 
 class UCBTest(BaseTestCase):
     def test_UCB1(self):
-        algo = UCB1([], [])
-        algo.initialize(self.n_arms)
-        results = test_run(algo, self.arms, self.N_SIMS, self.HORIZON)
+        results = test_run( UCB1([], []), self.arms, self.N_SIMS, self.HORIZON)
 
         f = open(RESULTS_DIR+"ucb1_results2.csv", "w")
         head = ['best_arm', 'num_sim', 'times', 'chosen_arm', 'rewards','cumulative_rewards']
@@ -184,9 +175,7 @@ class UCBTest(BaseTestCase):
         headers = ['alpha', 'best_arm', 'num_sim', 'times', 'chosen_arm', 'rewards','cumulative_rewards']
         results_to_file(f, None, headers)
         for alpha in [0.1, 0.3, 0.5, 0.7, 0.9]:
-            algo = UCB2(alpha, [], [])
-            algo.initialize(self.n_arms)
-            results = test_run(algo, self.arms, self.N_SIMS, self.HORIZON)
+            results = test_run(UCB2(alpha, [], []), self.arms, self.N_SIMS, self.HORIZON)
             results_to_file(f, [len(results[0])*[alpha]] + [len(results[0])*[ind_max(self.means)]] + results)
         f.close()
 
@@ -196,25 +185,20 @@ class Exp3Test(BaseTestCase):
         f = open(RESULTS_DIR+"exp3_results2.csv", "w")
         headers = ['exp3_gamma', 'best_arm', 'num_sim', 'times', 'chosen_arm', 'rewards','cumulative_rewards']
         for exp3_gamma in [0.1, 0.2, 0.3, 0.4, 0.5]:
-            algo = Exp3(exp3_gamma, [])
-            algo.initialize(self.n_arms)
-            results = test_run(algo, self.arms, self.N_SIMS, self.HORIZON)
+            results = test_run( Exp3(exp3_gamma, []), self.arms, self.N_SIMS, self.HORIZON)
             results_to_file(f, [len(results[0])*[exp3_gamma]] + [len(results[0])*[ind_max(self.means)]] + results)
         f.close()
 
 
 class HedgeTest(BaseTestCase):
-  def test_hedge(self):
-    f = open(RESULTS_DIR+"hedge_results.tsv", "w")
-
-    for eta in [0.1, 0.2, 0.3, 0.4, 0.5]:
-      algo = Hedge(eta, [], [])
-      algo.initialize(self.n_arms)
-      results = test_run(algo, self.arms, 5000, 250)
-      for i in range(len(results[0])):
-        f.write(str(temperature) + "\t")
-        f.write("\t".join([str(results[j][i]) for j in range(len(results))]) + "\n")
-    f.close()
+    def test_hedge(self):
+        return
+        f = open(RESULTS_DIR+"hedge_results.tsv", "w")
+        headers = ['eta', 'best_arm', 'num_sim', 'times', 'chosen_arm', 'rewards','cumulative_rewards']
+        for eta in [0.1, 0.2, 0.3, 0.4, 0.5]:
+            results = test_run( Hedge(eta, [], []), self.arms, 5000, 250)
+            results_to_file(f, [len(results[0])*[eta]] + [len(results[0])*[ind_max(self.means)]] + results)
+        f.close()
 
 
 if __name__ == '__main__':
