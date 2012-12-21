@@ -198,7 +198,7 @@ class Exp3Test(BaseTestCase):
         for exp3_gamma in [0.1, 0.2, 0.3, 0.4, 0.5]:
             algo = Exp3(exp3_gamma, [])
             algo.initialize(self.n_arms)
-            results = test_algorithm(algo, self.arms, self.N_SIMS, self.HORIZON)
+            results = test_run(algo, self.arms, self.N_SIMS, self.HORIZON)
             results_to_file(f, [len(results[0])*[exp3_gamma]] + [len(results[0])*[ind_max(self.means)]] + results)
         f.close()
 
@@ -210,7 +210,7 @@ class HedgeTest(BaseTestCase):
     for eta in [0.1, 0.2, 0.3, 0.4, 0.5]:
       algo = Hedge(eta, [], [])
       algo.initialize(self.n_arms)
-      results = test_algorithm(algo, self.arms, 5000, 250)
+      results = test_run(algo, self.arms, 5000, 250)
       for i in range(len(results[0])):
         f.write(str(temperature) + "\t")
         f.write("\t".join([str(results[j][i]) for j in range(len(results))]) + "\n")
