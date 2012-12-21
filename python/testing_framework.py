@@ -134,13 +134,13 @@ class EpsilonGreedyTest(TestCase):
     
     def test_standard2(self):
         f = open(RESULTS_DIR+"epsilon_greedy_standard_results2.csv", "w")
-        results_to_file(f, None, ['epsilon','num_sim', 'times', 'chosen_arm', 'rewards','cumulative_rewards'])
+        results_to_file(f, None, ['epsilon','best_arm', 'num_sim', 'times', 'chosen_arm', 'rewards','cumulative_rewards'])
 
         for epsilon in [0.1, 0.2, 0.3, 0.4, 0.5]:
             algo = EpsilonGreedy(epsilon, [], [])
             algo.initialize(self.n_arms)
             results = test_run(algo, self.arms, self.N_SIMS, self.HORIZON)
-            results_to_file(f, [len(results[0])*[epsilon]]+results)
+            results_to_file(f, [len(results[0])*[epsilon]] + [len(results[0])*[ind_max(self.means)]] + results)
 
         f.close()
 
