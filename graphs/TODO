@@ -1,0 +1,2 @@
+- Add confidence ranges in plots
+- Merge EpsilonGreedy plotting routines since you can compare epsilon vs. annealing variants

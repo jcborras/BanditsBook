@@ -148,7 +148,7 @@ class SoftmaxTest(BaseTestCase):
         headers = ['temperature', 'best_arm', 'num_sim', 'times', 'chosen_arm', 'rewards','cumulative_rewards']
         results_to_file(f, None, headers)
         for temperature in [0.1, 0.2, 0.3, 0.4, 0.5]:
-            results = test_run(Softmax(temperature, [], []), self.arms, self.NSIMS, self.HORIZON)
+            results = test_run(Softmax(temperature, [], []), self.arms, self.N_SIMS, self.HORIZON)
             results_to_file(f, [len(results[0])*[temperature]] + [len(results[0])*[ind_max(self.means)]] + results)
         f.close()
 
@@ -181,9 +181,10 @@ class UCBTest(BaseTestCase):
 
 
 class Exp3Test(BaseTestCase):
-    def test_Exp3_b(self):
+    def test_Exp3(self):
         f = open(RESULTS_DIR+"exp3_results2.csv", "w")
         headers = ['exp3_gamma', 'best_arm', 'num_sim', 'times', 'chosen_arm', 'rewards','cumulative_rewards']
+        results_to_file(f, None, headers)
         for exp3_gamma in [0.1, 0.2, 0.3, 0.4, 0.5]:
             results = test_run( Exp3(exp3_gamma, []), self.arms, self.N_SIMS, self.HORIZON)
             results_to_file(f, [len(results[0])*[exp3_gamma]] + [len(results[0])*[ind_max(self.means)]] + results)
@@ -193,8 +194,9 @@ class Exp3Test(BaseTestCase):
 class HedgeTest(BaseTestCase):
     def test_hedge(self):
         return
-        f = open(RESULTS_DIR+"hedge_results.tsv", "w")
+        f = open(RESULTS_DIR+"hedge_results2.csv", "w")
         headers = ['eta', 'best_arm', 'num_sim', 'times', 'chosen_arm', 'rewards','cumulative_rewards']
+        results_to_file(f, None, headers)
         for eta in [0.1, 0.2, 0.3, 0.4, 0.5]:
             results = test_run( Hedge(eta, [], []), self.arms, 5000, 250)
             results_to_file(f, [len(results[0])*[eta]] + [len(results[0])*[ind_max(self.means)]] + results)
