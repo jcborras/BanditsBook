@@ -5,8 +5,8 @@ library("ggplot2")
 #aua <- 'epsilon_greedy_standard_results2'; parameter.name <- 'epsilon'
 #aua <- 'softmax_standard_results2' ; parameter.name <- 'temperature'
 #aua <- 'ucb2_results2' ; parameter.name <- 'alpha'
-aua <- 'exp3_results2' ; parameter.name <- 'exp3_gamma'
-#aua <- 'hedge_results2' ; parameter.name <- 'eta'
+#aua <- 'exp3_results2' ; parameter.name <- 'exp3_gamma'
+aua <- 'hedge_results2' ; parameter.name <- 'eta'
 
 avg.reward.over.time <- function(x, p) {
   ddply(results, c(p, 'times'), function (x) c(avg.reward=mean(x$rewards)), .progress='text') }
