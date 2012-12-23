@@ -13,8 +13,8 @@ def categorical_draw(probs):
   return len(probs) - 1
 
 class Hedge(object):
-  def __init__(self, temperature, counts, values):
-    self.temperature = temperature
+  def __init__(self, eta, counts, values):
+    self.eta = eta
     self.counts = counts
     self.values = values
     return
@@ -25,10 +25,9 @@ class Hedge(object):
     return
   
   def select_arm(self):
-    zz = [exp(v / self.temperature) for v in self.values]
-    print zz
+    zz = [exp(v / self.eta) for v in self.values]
     z = sum(zz)
-    probs = [exp(v / self.temperature) / z for v in self.values]
+    probs = [ i/z for i in zz]
     return categorical_draw(probs)
   
   def update(self, chosen_arm, reward):

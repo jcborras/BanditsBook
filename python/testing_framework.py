@@ -193,11 +193,10 @@ class Exp3Test(BaseTestCase):
 
 class HedgeTest(BaseTestCase):
     def test_hedge(self):
-        return
         f = open(RESULTS_DIR+"hedge_results2.csv", "w")
         headers = ['eta', 'best_arm', 'num_sim', 'times', 'chosen_arm', 'rewards','cumulative_rewards']
         results_to_file(f, None, headers)
-        for eta in [0.1, 0.2, 0.3, 0.4, 0.5]:
+        for eta in [0.5, 0.8, 0.9, 1, 2]: 
             results = test_run( Hedge(eta, [], []), self.arms, 5000, 250)
             results_to_file(f, [len(results[0])*[eta]] + [len(results[0])*[ind_max(self.means)]] + results)
         f.close()
